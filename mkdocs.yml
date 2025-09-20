@@ -1,0 +1,14 @@
+site_name: FS Dashboard Docs
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - CAN & DBC: can-db.md
+  - Plausibility Spec (stub): plausibility.md
+  - Setup (PC): setup-pc.md
+  - Roadmap: roadmap.md
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true

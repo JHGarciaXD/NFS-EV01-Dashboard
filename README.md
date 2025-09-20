@@ -52,15 +52,6 @@ You should see APPS/Brake bars moving at ~30 FPS and the status banner showing *
 
 ---
 
-## Docs (MkDocs)
-```bash
-pip install mkdocs mkdocs-material
-mkdocs serve
-```
-Open the URL printed by MkDocs (usually http://127.0.0.1:8000).
-
----
-
 ## Next weeks
 - **Week 2:** MCU filters + plausibility on Arduino; real CAN @ 100 Hz.
 - **Week 3:** Diagnostics + calibration (engineering mode) — on-demand CAN service.

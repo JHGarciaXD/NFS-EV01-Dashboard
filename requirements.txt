@@ -1,5 +1,2 @@
-pygame
-python-can
-cantools
-mkdocs
-mkdocs-material
+python-can>=4.3
+pygame>=2.5

@@ -29,6 +29,12 @@ _CARDS = [
         "target": "startup",
         "icon": "TS",
     },
+    {
+        "label": "Temperatures",
+        "sublabel": "Fan thresholds & live temps",
+        "target": "temp",
+        "icon": "TMP",
+    },
     # Future cards go here, e.g.:
     # {"label": "Brake Bias",  "sublabel": "Front/rear balance", "target": "brake_bias", "icon": "BB"},
     # {"label": "Diagnostics", "sublabel": "Live fault codes",   "target": "diag",       "icon": "DX"},

@@ -1,18 +1,17 @@
 """
 main.py
 Entry point for the FS Dashboard.
-
 Run with:
     python main.py
 """
 
-import pygame
 import can
-
 import can_rx
+import pygame
 from ui.dashboard import DashboardScreen
-from ui.menu      import MenuScreen
-from ui.tc        import TCScreen
+from ui.menu import MenuScreen
+from ui.startup import StartupScreen  # was service.startup
+from ui.tc import TCScreen
 
 # ---------------------------------------------------------------------------
 # CAN bus
@@ -26,38 +25,47 @@ can_rx.start(BUS)
 # Pygame
 # ---------------------------------------------------------------------------
 pygame.init()
-W, H   = 800, 480
+W, H = 800, 480
 screen = pygame.display.set_mode((W, H))
-pygame.display.set_caption("FS Dashboard")
-clock  = pygame.time.Clock()
+pygame.display.set_caption("NFS Dashboard")
+clock = pygame.display.flip and pygame.time.Clock()
+clock = pygame.time.Clock()
 
 # ---------------------------------------------------------------------------
 # Screen registry
 # ---------------------------------------------------------------------------
-tc_screen = TCScreen(bus=BUS)   # give TC direct access to the bus for sending
+tc_screen = TCScreen(bus=BUS)
+startup_screen = StartupScreen()  # ← NEW
 
 screens: dict = {
+    "startup": startup_screen,  # ← NEW
     "dashboard": DashboardScreen(),
-    "menu":      MenuScreen(),
-    "tc":        tc_screen,
+    "menu": MenuScreen(),
+    "tc": tc_screen,
 }
-current: str = "dashboard"
+current: str = "startup"  # ← start here, not dashboard
 
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
-print("[INIT] UI loop started.")
+print("[INIT] UI loop started. Beginning startup sequence.")
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             continue
-
         result = screens[current].handle_event(event)
         if result and result in screens:
             print(f"[NAV] {current} → {result}")
             current = result
+
+    # ── Startup screen auto-navigation ─────────────────────────────────────
+    # StartupScreen signals completion via a property rather than an event,
+    # because the transition is time-driven (TSAL blink count), not input-driven.
+    if current == "startup" and startup_screen.wants_dashboard:
+        print("[NAV] startup → dashboard (sequence complete)")
+        current = "dashboard"
 
     screens[current].draw(screen, can_rx.latest)
     pygame.display.flip()

@@ -16,6 +16,10 @@ ID_BATT = 0x111
 ID_TEMPS = 0x112
 ID_HB = 0x102
 
+D_M161 = 0xA1  # Cascadia hot spot motor
+ID_M162 = 0xA2  # Cascadia hot spot inverter
+
+
 BUS_CHANNEL = "vcan0"  # change to "can0" on the Pi
 
 latest = {
@@ -47,6 +51,7 @@ _LOG_INTERVAL = {
     ID_HB: 1.00,
 }
 
+
 summary_last = 0.0
 summary_interval = 1.0  # 1 Hz
 
@@ -55,6 +60,7 @@ _temp_handler = None
 
 
 def register_temp_handler(fn):
+    """Call once from main.py to route temp-relevant frames to TempService."""
     global _temp_handler
     _temp_handler = fn
 

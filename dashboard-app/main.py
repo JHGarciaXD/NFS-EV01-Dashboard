@@ -5,7 +5,7 @@ main.py
 import can
 import can_rx
 import pygame
-from services.temp_service import TempService
+from service.temp_service import TempService
 from ui.dashboard import DashboardScreen
 from ui.menu import MenuScreen
 from ui.startup import StartupScreen

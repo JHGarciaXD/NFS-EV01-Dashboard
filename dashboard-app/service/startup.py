@@ -1,12 +1,10 @@
 """
 service/startup.py
-──────────────────
+------------------
 Pure startup sequence logic — no pygame, no drawing.
-Tracks the interlock chain phases and TSAL blink state.
-Consumed by ui/startup.py (and testable standalone).
+Consumed by ui/startup.py.
 """
 
-# ── Attempt to import RPi GPIO ────────────────────────────────────────────
 try:
     import RPi.GPIO as GPIO
 
@@ -16,26 +14,21 @@ try:
 except ImportError:
     _GPIO_AVAILABLE = False
 
-# ── Phases ────────────────────────────────────────────────────────────────
+# -- Phases -----------------------------------------------------------------
 PHASE_LV_ON = 0
 PHASE_KEY_WAIT = 1
 PHASE_TSMS_WAIT = 2
 PHASE_TSAL = 3
 PHASE_READY = 4
 
-# ── Timing ────────────────────────────────────────────────────────────────
+# -- Timing -----------------------------------------------------------------
 TSAL_BLINK_HZ = 2.0
-TSAL_BLINK_MS = int(1000 / TSAL_BLINK_HZ / 2)  # half-period
+TSAL_BLINK_MS = int(1000 / TSAL_BLINK_HZ / 2)
 TSAL_BLINKS_REQUIRED = 6
 READY_HOLD_MS = 1500
 
 
 class StartupService:
-    """
-    Manages startup interlock state.
-    Call tick(now_ms) every frame; read properties to get current state.
-    """
-
     def __init__(self):
         self.reset()
         if _GPIO_AVAILABLE:
@@ -43,14 +36,12 @@ class StartupService:
             GPIO.setup(KEY_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
             GPIO.setup(TSMS_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-    # ── Public inputs (set by UI on keyboard/GPIO) ─────────────────────────
     def inject_key(self):
         self._key_state = True
 
     def inject_tsms(self):
         self._tsms_state = True
 
-    # ── Public read-only state ─────────────────────────────────────────────
     @property
     def phase(self) -> int:
         return self._phase
@@ -70,9 +61,7 @@ class StartupService:
             self._navigate_away = False
         return val
 
-    # ── tick ──────────────────────────────────────────────────────────────
     def tick(self, now_ms: int):
-        """Advance state machine. Call once per frame with current ms timestamp."""
         self._poll_gpio()
 
         if self._phase == PHASE_LV_ON:
@@ -80,12 +69,12 @@ class StartupService:
 
         elif self._phase == PHASE_KEY_WAIT:
             if self._key_state:
-                print("[STARTUP] Key accepted → waiting for TSMS")
+                print("[STARTUP] Key accepted -> waiting for TSMS")
                 self._phase = PHASE_TSMS_WAIT
 
         elif self._phase == PHASE_TSMS_WAIT:
             if self._tsms_state:
-                print("[STARTUP] TSMS closed → HV ON → TSAL blinking")
+                print("[STARTUP] TSMS closed -> HV ON -> TSAL blinking")
                 self._phase = PHASE_TSAL
                 self._tsal_last = now_ms
 
@@ -96,7 +85,7 @@ class StartupService:
                 if self._tsal_on:
                     self._tsal_blinks += 1
             if self._tsal_blinks >= TSAL_BLINKS_REQUIRED:
-                print("[STARTUP] TSAL blink complete → READY")
+                print("[STARTUP] TSAL blink complete -> READY")
                 self._phase = PHASE_READY
                 self._ready_at = now_ms
 
@@ -105,7 +94,6 @@ class StartupService:
                 self.reset()
                 self._navigate_away = True
 
-    # ── reset ─────────────────────────────────────────────────────────────
     def reset(self):
         self._phase = PHASE_LV_ON
         self._tsal_on = False
@@ -116,9 +104,8 @@ class StartupService:
         self._tsms_state = False
         self._navigate_away = False
 
-    # ── GPIO poll ─────────────────────────────────────────────────────────
     def _poll_gpio(self):
         if not _GPIO_AVAILABLE:
             return
-        self._key_state = GPIO.input(KEY_PIN)
-        self._tsms_state = GPIO.input(TSMS_PIN)
+        self._key_state = bool(GPIO.input(KEY_PIN))
+        self._tsms_state = bool(GPIO.input(TSMS_PIN))

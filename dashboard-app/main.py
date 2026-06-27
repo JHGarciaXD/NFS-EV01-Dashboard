@@ -6,9 +6,9 @@ import can
 import can_rx
 import pygame
 from service.temp_service import TempService
+from service.tsal import TSALService
 from ui.dashboard import DashboardScreen
 from ui.menu import MenuScreen
-from ui.startup import StartupScreen
 from ui.tc import TCScreen
 from ui.temp_control import TempControlScreen
 
@@ -23,8 +23,9 @@ can_rx.start(BUS)
 # ---------------------------------------------------------------------------
 # Services
 # ---------------------------------------------------------------------------
-temp_svc = TempService(bus=BUS)  # ← only once
-can_rx.register_temp_handler(temp_svc.on_can_frame)  # ← only once, here
+temp_svc = TempService(bus=BUS)
+can_rx.register_temp_handler(temp_svc.on_can_frame)
+tsal_svc = TSALService()
 
 # ---------------------------------------------------------------------------
 # Pygame
@@ -38,22 +39,18 @@ clock = pygame.time.Clock()
 # ---------------------------------------------------------------------------
 # Screen registry
 # ---------------------------------------------------------------------------
-tc_screen = TCScreen(bus=BUS)
-startup_screen = StartupScreen()
-
 screens: dict = {
-    "startup": startup_screen,
-    "dashboard": DashboardScreen(),
+    "dashboard": DashboardScreen(tsal=tsal_svc),
     "menu": MenuScreen(),
-    "tc": tc_screen,
+    "tc": TCScreen(bus=BUS),
     "temp": TempControlScreen(bus=BUS, service=temp_svc),
 }
-current: str = "startup"
+current: str = "dashboard"
 
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
-print("[INIT] UI loop started. Beginning startup sequence.")
+print("[INIT] UI loop started.")
 running = True
 while running:
     for event in pygame.event.get():
@@ -62,18 +59,15 @@ while running:
             continue
         result = screens[current].handle_event(event)
         if result and result in screens:
-            print(f"[NAV] {current} → {result}")
+            print(f"[NAV] {current} -> {result}")
             current = result
 
-    if current == "startup" and startup_screen.wants_dashboard:
-        print("[NAV] startup → dashboard (sequence complete)")
-        current = "dashboard"
-
-    can_rx.latest.update(temp_svc.summary())  # ← stays in loop, correct
-
+    tsal_svc.tick(pygame.time.get_ticks())
+    can_rx.latest.update(temp_svc.summary())
     screens[current].draw(screen, can_rx.latest)
     pygame.display.flip()
     clock.tick(30)
 
+tsal_svc.cleanup()
 pygame.quit()
 print("[EXIT] Dashboard closed.")

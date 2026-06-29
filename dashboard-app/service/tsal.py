@@ -86,9 +86,9 @@ class TSALService:
     def _set_red(self, on: bool):
         if not _GPIO_AVAILABLE:
             return
-        GPIO.output(RELAY_RED_PIN, GPIO.HIGH if on else GPIO.LOW)
+        GPIO.output(RELAY_RED_PIN, GPIO.LOW if on else GPIO.HIGH)
 
     def _set_green(self, on: bool):
         if not _GPIO_AVAILABLE:
             return
-        GPIO.output(RELAY_GREEN_PIN, GPIO.HIGH if on else GPIO.LOW)
+        GPIO.output(RELAY_GREEN_PIN, GPIO.LOW if on else GPIO.HIGH)

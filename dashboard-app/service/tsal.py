@@ -80,8 +80,8 @@ class TSALService:
     def _poll_gpio(self):
         if not _GPIO_AVAILABLE:
             return
-        self._lv_on = bool(GPIO.input(LV_PIN))
-        self._hv_on = bool(GPIO.input(HV_PIN))
+        # self._lv_on = bool(GPIO.input(LV_PIN))
+        # self._hv_on = bool(GPIO.input(HV_PIN))
 
     def _set_red(self, on: bool):
         if not _GPIO_AVAILABLE:

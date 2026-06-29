@@ -13,8 +13,8 @@ try:
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LV_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(HV_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(RELAY_RED_PIN, GPIO.OUT, initial=GPIO.LOW)
-    GPIO.setup(RELAY_GREEN_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(RELAY_RED_PIN, GPIO.OUT, initial=GPIO.HIGH)
+    GPIO.setup(RELAY_GREEN_PIN, GPIO.OUT, initial=GPIO.HIGH)
 except ImportError:
     _GPIO_AVAILABLE = False
 

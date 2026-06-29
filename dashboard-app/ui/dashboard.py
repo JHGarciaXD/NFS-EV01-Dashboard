@@ -21,7 +21,7 @@ _BTN_MENU = pygame.Rect(560, 295, 90, 45)
 class DashboardScreen:
     def __init__(self, tsal: TSALService):  # ← ADD
         self._tsal = tsal
-        self._lv_on = True  # dashboard on = LV on by default
+        self._tsal.inject_lv()
         self._hv_on = False
         self._blink_on = False
         self._last_ms = 0
